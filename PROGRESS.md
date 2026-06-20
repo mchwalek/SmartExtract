@@ -10,19 +10,26 @@ resume, check this file and `git log` to determine where to resume.
 
 | Task | Description | Status | Commits |
 |------|-------------|--------|---------|
-| 1 | Project scaffold | pending | - |
-| 2 | NameHelper | pending | - |
-| 3 | ArchiveEntry + ArchiveListParser + SmartExtractLogic | pending | - |
-| 4 | SevenZipLocator | pending | - |
-| 5 | ExtractionRunner | pending | - |
-| 6 | ArchiveInspector + Program.cs integration | pending | - |
-| 7 | Install/uninstall scripts | pending | - |
+| 1 | Project scaffold | complete | e2dea60 |
+| 2 | NameHelper | complete | 5350c55 |
+| 3 | ArchiveEntry + ArchiveListParser + SmartExtractLogic | complete | 53ee9e8 |
+| 4 | SevenZipLocator | complete | 7fd0c60 |
+| 5 | ExtractionRunner | complete | a7ef9da |
+| 6 | ArchiveInspector + Program.cs integration | complete | 564e3b4 |
+| 7 | Install/uninstall scripts | complete | 4b978d0 |
 
-## Minor findings from reviews
-(populated during execution)
+## Bug fixes during implementation
+- 8276191: ArchiveListParser: split on blank lines within ---------- blocks (D12)
+- 3ffd07a: ExtractionRunner: UseShellExecute=true for 7zG.exe (D13)
+- ArchiveListParserTests: added RealFormat test (multi-entry block)
 
-## Notes
-- Tasks 2+3 can run in parallel after Task 1 (independent files, same commit sequence)
-- Tasks 4+5 can run in parallel after Tasks 2+3
-- Task 7 can run in parallel with Task 6 (no source dependencies)
-- SDD bash scripts replaced with PowerShell equivalents (see plan Execution Notes)
+## Minor findings
+- None outstanding
+
+## Test results
+- 36/36 unit tests passing (dotnet test -c Release)
+- Smoke test 1 (well-wrapped archive): PASS
+- Smoke test 2 (flat archive): PASS
+
+## Next step
+Final code review (all tasks complete)
