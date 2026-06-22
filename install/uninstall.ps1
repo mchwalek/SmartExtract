@@ -1,6 +1,6 @@
 ﻿# SmartUnzip Uninstall Script
 
-$InstallDir = "C:\Program Files\SmartUnzip"
+$InstallDir = Join-Path $env:LOCALAPPDATA "SmartUnzip"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
 

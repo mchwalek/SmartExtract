@@ -7,5 +7,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>SmartUnzip</AssemblyName>
     <RootNamespace>SmartUnzip</RootNamespace>
+    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 </Project>

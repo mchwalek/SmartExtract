@@ -1,7 +1,7 @@
 ﻿# SmartUnzip Install Script
 # Per-user - no administrator privileges required.
 
-$InstallDir = "C:\Program Files\SmartUnzip"
+$InstallDir = Join-Path $env:LOCALAPPDATA "SmartUnzip"
 $ExeName    = "SmartUnzip.exe"
 $MenuLabel  = "Smart Extract"
 $MenuKey    = "SmartExtract"
@@ -20,8 +20,13 @@ if (-not (Test-Path $InstallDir)) {
     Write-Host "Created: $InstallDir"
 }
 
-Copy-Item -Path $SourceExe -Destination $ExePath -Force
-Write-Host "Installed: $ExePath"
+try {
+    Copy-Item -Path $SourceExe -Destination $ExePath -Force -ErrorAction Stop
+    Write-Host "Installed: $ExePath"
+} catch {
+    Write-Error "Failed to copy '$ExeName' to '$InstallDir': $_"
+    exit 1
+}
 
 foreach ($ext in $Extensions) {
     $shellKey = "HKCU:\Software\Classes\SystemFileAssociations\$ext\shell\$MenuKey"
