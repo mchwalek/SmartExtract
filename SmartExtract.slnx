@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SmartExtract/SmartExtract.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SmartExtract.Tests/SmartExtract.Tests.csproj" />
+  </Folder>
+</Solution>

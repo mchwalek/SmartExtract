@@ -1,13 +1,13 @@
-﻿# SmartUnzip — Architecture Decisions
+﻿# SmartExtract — Architecture Decisions
 
 ## D1: Separate context menu entry (not inside 7-Zip's submenu)
 7-Zip's context menu is a COM shell extension (7-zip.dll) that cannot be extended
-from outside. SmartUnzip registers its own "Smart Extract" entry at
+from outside. SmartExtract registers its own "Smart Extract" entry at
 HKCU\Software\Classes\SystemFileAssociations\.<ext>\shell\SmartExtract.
 
 ## D2: 7zG.exe for extraction (not 7z.exe)
 7zG.exe is 7-Zip's GUI executable. It shows 7-Zip's native progress dialog and
-handles password prompts. No custom progress window needed in SmartUnzip.
+handles password prompts. No custom progress window needed in SmartExtract.
 
 ## D3: 7z.exe for archive listing
 7z.exe CLI is used with `l -slt` to list contents and parse the output.
@@ -39,7 +39,7 @@ OutputType=WinExe suppresses the console window. UseWindowsForms=true enables
 System.Windows.Forms.MessageBox for error dialogs. No Form is ever shown.
 
 ## D10: Test project targets net10.0-windows
-Required because SmartUnzip.csproj uses Windows APIs, and SevenZipLocatorTests
+Required because SmartExtract.csproj uses Windows APIs, and SevenZipLocatorTests
 access the Windows registry directly.
 
 ## D11: dotnet test only works in Release mode (not Debug) on this machine

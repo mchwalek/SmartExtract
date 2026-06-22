@@ -1,8 +1,9 @@
-﻿# SmartUnzip Install Script
+﻿# SmartExtract Install Script
 # Per-user - no administrator privileges required.
+# To produce the publish artifacts: dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/
 
-$InstallDir = Join-Path $env:LOCALAPPDATA "SmartUnzip"
-$ExeName    = "SmartUnzip.exe"
+$InstallDir = Join-Path $env:LOCALAPPDATA "SmartExtract"
+$ExeName    = "SmartExtract.exe"
 $MenuLabel  = "Smart Extract"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
@@ -11,7 +12,7 @@ $ExePath   = Join-Path $InstallDir $ExeName
 $SourceExe = Join-Path $PSScriptRoot $ExeName
 
 if (-not (Test-Path $SourceExe)) {
-    Write-Error "Cannot find '$ExeName' at: $PSScriptRoot`nBuild first: dotnet publish src/SmartUnzip -c Release -o install/"
+    Write-Error "Cannot find '$ExeName' at: $PSScriptRoot`nRun first: dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/"
     exit 1
 }
 
@@ -21,10 +22,14 @@ if (-not (Test-Path $InstallDir)) {
 }
 
 try {
-    Copy-Item -Path $SourceExe -Destination $ExePath -Force -ErrorAction Stop
-    Write-Host "Installed: $ExePath"
+    $files = Get-ChildItem -Path $PSScriptRoot -File |
+             Where-Object { $_.Extension -notin @('.ps1', '.pdb') }
+    foreach ($file in $files) {
+        Copy-Item -Path $file.FullName -Destination (Join-Path $InstallDir $file.Name) -Force -ErrorAction Stop
+    }
+    Write-Host "Installed $($files.Count) file(s) to: $InstallDir"
 } catch {
-    Write-Error "Failed to copy '$ExeName' to '$InstallDir': $_"
+    Write-Error "Failed to copy files to '$InstallDir': $_"
     exit 1
 }
 

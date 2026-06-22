@@ -1,5 +1,5 @@
 ﻿using System.Windows.Forms;
-using SmartUnzip;
+using SmartExtract;
 
 class Program
 {
@@ -8,8 +8,8 @@ class Program
     {
         if (args.Length != 1)
         {
-            MessageBox.Show("Usage: SmartUnzip <archive-path>",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Usage: SmartExtract <archive-path>",
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
 
@@ -18,7 +18,7 @@ class Program
         if (!File.Exists(archivePath))
         {
             MessageBox.Show($"File not found:\n{archivePath}",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
 
@@ -31,7 +31,7 @@ class Program
             {
                 MessageBox.Show(
                     $"7-Zip executables not found in:\n{sevenZipDir}\n\nPlease install 7-Zip.",
-                    "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 1;
             }
 
@@ -49,7 +49,7 @@ class Program
         catch (Exception ex)
         {
             MessageBox.Show($"Extraction failed:\n{ex.Message}",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
     }

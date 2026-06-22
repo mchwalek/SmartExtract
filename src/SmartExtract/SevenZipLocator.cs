@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class SevenZipLocator
 {

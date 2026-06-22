@@ -12,6 +12,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SmartUnzip\SmartUnzip.csproj" />
+    <ProjectReference Include="..\..\src\SmartExtract\SmartExtract.csproj" />
   </ItemGroup>
 </Project>

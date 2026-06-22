@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class ArchiveInspector
 {

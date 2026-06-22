@@ -1,4 +1,4 @@
-﻿# SmartUnzip — Progress Ledger
+﻿# SmartExtract — Progress Ledger
 
 This file is the durable progress record. After any context compaction or session
 resume, check this file and `git log` to determine where to resume.

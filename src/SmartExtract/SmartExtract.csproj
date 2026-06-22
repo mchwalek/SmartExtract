@@ -5,8 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>SmartUnzip</AssemblyName>
-    <RootNamespace>SmartUnzip</RootNamespace>
-    <PublishSingleFile>true</PublishSingleFile>
+    <AssemblyName>SmartExtract</AssemblyName>
+    <RootNamespace>SmartExtract</RootNamespace>
   </PropertyGroup>
 </Project>

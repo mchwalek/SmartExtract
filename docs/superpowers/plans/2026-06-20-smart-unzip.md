@@ -1,10 +1,10 @@
-﻿# SmartUnzip Implementation Plan
+﻿# SmartExtract Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a Windows context menu tool that intelligently extracts archives — directly if already wrapped in a single matching folder, or into a new folder otherwise.
 
-**Architecture:** A headless C# WinExe (`SmartUnzip.exe`) invoked by the Windows context menu with the archive path as its sole argument. It calls `7z.exe l -slt` to list archive contents, applies smart extraction logic, then delegates extraction to `7zG.exe` (7-Zip GUI executable, which shows native progress and handles passwords). No custom UI is shown — errors use `MessageBox.Show`.
+**Architecture:** A headless C# WinExe (`SmartExtract.exe`) invoked by the Windows context menu with the archive path as its sole argument. It calls `7z.exe l -slt` to list archive contents, applies smart extraction logic, then delegates extraction to `7zG.exe` (7-Zip GUI executable, which shows native progress and handles passwords). No custom UI is shown — errors use `MessageBox.Show`.
 
 **Tech Stack:** C# .NET 10 (`net10.0-windows`), xUnit 2.9.x, 7z.exe + 7zG.exe from 7-Zip 26.x at `C:\Program Files\7-Zip\`, PowerShell 5.1 for install scripts.
 
@@ -17,9 +17,9 @@
 - Context menu: `HKCU\Software\Classes\SystemFileAssociations\.<ext>\shell\SmartExtract` (per-user, no admin)
 - Supported extensions: `.zip`, `.7z`, `.rar`, `.gz`, `.bz2`, `.tar`
 - Compound extensions stripped: `.tar.gz`, `.tar.bz2`, `.tar.xz`, `.tar.zst`
-- All source: namespace `SmartUnzip`; all tests: namespace `SmartUnzip.Tests`
+- All source: namespace `SmartExtract`; all tests: namespace `SmartExtract.Tests`
 - Entry point: class `Program` with `[STAThread] static int Main(string[] args)`
-- Install directory variable: `$InstallDir = "C:\Program Files\SmartUnzip"` at top of install script
+- Install directory variable: `$InstallDir = "C:\Program Files\SmartExtract"` at top of install script
 - xUnit: `2.9.3`; `Microsoft.NET.Test.Sdk`: `17.12.0`; `xunit.runner.visualstudio`: `2.8.2`
 
 ---
@@ -28,25 +28,25 @@
 
 ```
 smart_unzip/
-  SmartUnzip.sln
+  SmartExtract.sln
   .gitignore
   DECISIONS.md
   PROGRESS.md
-  src/SmartUnzip/SmartUnzip.csproj
-  src/SmartUnzip/Program.cs
-  src/SmartUnzip/NameHelper.cs
-  src/SmartUnzip/ArchiveEntry.cs
-  src/SmartUnzip/ArchiveListParser.cs
-  src/SmartUnzip/SmartExtractLogic.cs
-  src/SmartUnzip/SevenZipLocator.cs
-  src/SmartUnzip/ArchiveInspector.cs
-  src/SmartUnzip/ExtractionRunner.cs
-  tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj
-  tests/SmartUnzip.Tests/NameHelperTests.cs
-  tests/SmartUnzip.Tests/ArchiveListParserTests.cs
-  tests/SmartUnzip.Tests/SmartExtractLogicTests.cs
-  tests/SmartUnzip.Tests/SevenZipLocatorTests.cs
-  tests/SmartUnzip.Tests/ExtractionRunnerTests.cs
+  src/SmartExtract/SmartExtract.csproj
+  src/SmartExtract/Program.cs
+  src/SmartExtract/NameHelper.cs
+  src/SmartExtract/ArchiveEntry.cs
+  src/SmartExtract/ArchiveListParser.cs
+  src/SmartExtract/SmartExtractLogic.cs
+  src/SmartExtract/SevenZipLocator.cs
+  src/SmartExtract/ArchiveInspector.cs
+  src/SmartExtract/ExtractionRunner.cs
+  tests/SmartExtract.Tests/SmartExtract.Tests.csproj
+  tests/SmartExtract.Tests/NameHelperTests.cs
+  tests/SmartExtract.Tests/ArchiveListParserTests.cs
+  tests/SmartExtract.Tests/SmartExtractLogicTests.cs
+  tests/SmartExtract.Tests/SevenZipLocatorTests.cs
+  tests/SmartExtract.Tests/ExtractionRunnerTests.cs
   install/install.ps1
   install/uninstall.ps1
   docs/superpowers/plans/2026-06-20-smart-unzip.md
@@ -57,17 +57,17 @@ smart_unzip/
 ### Task 1: Project Scaffold
 
 **Files:**
-- Create: `SmartUnzip.sln`
+- Create: `SmartExtract.sln`
 - Create: `.gitignore`
-- Create: `src/SmartUnzip/SmartUnzip.csproj`
-- Create: `src/SmartUnzip/Program.cs` (stub — returns 0)
-- Create: `tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj`
-- Create: `tests/SmartUnzip.Tests/PlaceholderTest.cs`
+- Create: `src/SmartExtract/SmartExtract.csproj`
+- Create: `src/SmartExtract/Program.cs` (stub — returns 0)
+- Create: `tests/SmartExtract.Tests/SmartExtract.Tests.csproj`
+- Create: `tests/SmartExtract.Tests/PlaceholderTest.cs`
 
 **Interfaces:**
-- Produces: `dotnet build SmartUnzip.sln` exits 0; `dotnet test` exits 0 with 1 passing test
+- Produces: `dotnet build SmartExtract.sln` exits 0; `dotnet test` exits 0 with 1 passing test
 
-- [ ] **Step 1: Create `src/SmartUnzip/SmartUnzip.csproj`**
+- [ ] **Step 1: Create `src/SmartExtract/SmartExtract.csproj`**
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -77,16 +77,16 @@ smart_unzip/
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>SmartUnzip</AssemblyName>
-    <RootNamespace>SmartUnzip</RootNamespace>
+    <AssemblyName>SmartExtract</AssemblyName>
+    <RootNamespace>SmartExtract</RootNamespace>
   </PropertyGroup>
 </Project>
 ```
 
-- [ ] **Step 2: Create `src/SmartUnzip/Program.cs`**
+- [ ] **Step 2: Create `src/SmartExtract/Program.cs`**
 
 ```csharp
-namespace SmartUnzip;
+namespace SmartExtract;
 
 class Program
 {
@@ -98,7 +98,7 @@ class Program
 }
 ```
 
-- [ ] **Step 3: Create `tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj`**
+- [ ] **Step 3: Create `tests/SmartExtract.Tests/SmartExtract.Tests.csproj`**
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -115,15 +115,15 @@ class Program
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SmartUnzip\SmartUnzip.csproj" />
+    <ProjectReference Include="..\..\src\SmartExtract\SmartExtract.csproj" />
   </ItemGroup>
 </Project>
 ```
 
-- [ ] **Step 4: Create `tests/SmartUnzip.Tests/PlaceholderTest.cs`**
+- [ ] **Step 4: Create `tests/SmartExtract.Tests/PlaceholderTest.cs`**
 
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class PlaceholderTest
 {
@@ -138,16 +138,16 @@ public class PlaceholderTest
 - [ ] **Step 5: Create solution and add projects**
 
 ```
-dotnet new sln -n SmartUnzip
-dotnet sln add src/SmartUnzip/SmartUnzip.csproj
-dotnet sln add tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj
+dotnet new sln -n SmartExtract
+dotnet sln add src/SmartExtract/SmartExtract.csproj
+dotnet sln add tests/SmartExtract.Tests/SmartExtract.Tests.csproj
 ```
 
 - [ ] **Step 6: Build and test**
 
 ```
-dotnet build SmartUnzip.sln
-dotnet test SmartUnzip.sln
+dotnet build SmartExtract.sln
+dotnet test SmartExtract.sln
 ```
 
 Expected: build succeeds, 1 test passes, output pristine.
@@ -164,17 +164,17 @@ git commit -m "chore: scaffold solution, projects, and placeholder test"
 ### Task 2: NameHelper — Archive Base Name Extraction
 
 **Files:**
-- Create: `src/SmartUnzip/NameHelper.cs`
-- Create: `tests/SmartUnzip.Tests/NameHelperTests.cs`
+- Create: `src/SmartExtract/NameHelper.cs`
+- Create: `tests/SmartExtract.Tests/NameHelperTests.cs`
 
 **Interfaces:**
 - Produces: `public static class NameHelper` with `public static string GetBaseName(string archivePath)`
 - Strips compound suffixes (`.tar.gz`, `.tar.bz2`, `.tar.xz`, `.tar.zst`) case-insensitively first; otherwise `Path.GetFileNameWithoutExtension`.
 
-- [ ] **Step 1: Write failing tests `tests/SmartUnzip.Tests/NameHelperTests.cs`**
+- [ ] **Step 1: Write failing tests `tests/SmartExtract.Tests/NameHelperTests.cs`**
 
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class NameHelperTests
 {
@@ -202,15 +202,15 @@ public class NameHelperTests
 - [ ] **Step 2: Run — verify fail**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~NameHelperTests"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~NameHelperTests"
 ```
 
 Expected: build error — `NameHelper` not defined.
 
-- [ ] **Step 3: Implement `src/SmartUnzip/NameHelper.cs`**
+- [ ] **Step 3: Implement `src/SmartExtract/NameHelper.cs`**
 
 ```csharp
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class NameHelper
 {
@@ -235,7 +235,7 @@ public static class NameHelper
 - [ ] **Step 4: Run — verify pass**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~NameHelperTests"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~NameHelperTests"
 ```
 
 Expected: 13 tests passing, output pristine.
@@ -243,13 +243,13 @@ Expected: 13 tests passing, output pristine.
 - [ ] **Step 5: Full suite**
 
 ```
-dotnet test SmartUnzip.sln
+dotnet test SmartExtract.sln
 ```
 
 - [ ] **Step 6: Commit**
 
 ```
-git add src/SmartUnzip/NameHelper.cs tests/SmartUnzip.Tests/NameHelperTests.cs
+git add src/SmartExtract/NameHelper.cs tests/SmartExtract.Tests/NameHelperTests.cs
 git commit -m "feat: add NameHelper with compound extension stripping"
 ```
 
@@ -258,11 +258,11 @@ git commit -m "feat: add NameHelper with compound extension stripping"
 ### Task 3: ArchiveEntry + ArchiveListParser + SmartExtractLogic
 
 **Files:**
-- Create: `src/SmartUnzip/ArchiveEntry.cs`
-- Create: `src/SmartUnzip/ArchiveListParser.cs`
-- Create: `src/SmartUnzip/SmartExtractLogic.cs`
-- Create: `tests/SmartUnzip.Tests/ArchiveListParserTests.cs`
-- Create: `tests/SmartUnzip.Tests/SmartExtractLogicTests.cs`
+- Create: `src/SmartExtract/ArchiveEntry.cs`
+- Create: `src/SmartExtract/ArchiveListParser.cs`
+- Create: `src/SmartExtract/SmartExtractLogic.cs`
+- Create: `tests/SmartExtract.Tests/ArchiveListParserTests.cs`
+- Create: `tests/SmartExtract.Tests/SmartExtractLogicTests.cs`
 
 **Interfaces:**
 - `public record ArchiveEntry(string Path, bool IsDirectory)`
@@ -278,9 +278,9 @@ git commit -m "feat: add NameHelper with compound extension stripping"
 
 - [ ] **Step 1: Write failing tests**
 
-`tests/SmartUnzip.Tests/ArchiveListParserTests.cs`:
+`tests/SmartExtract.Tests/ArchiveListParserTests.cs`:
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class ArchiveListParserTests
 {
@@ -376,9 +376,9 @@ public class ArchiveListParserTests
 }
 ```
 
-`tests/SmartUnzip.Tests/SmartExtractLogicTests.cs`:
+`tests/SmartExtract.Tests/SmartExtractLogicTests.cs`:
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class SmartExtractLogicTests
 {
@@ -468,23 +468,23 @@ public class SmartExtractLogicTests
 - [ ] **Step 2: Run — verify fail**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~ArchiveListParser|FullyQualifiedName~SmartExtractLogic"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~ArchiveListParser|FullyQualifiedName~SmartExtractLogic"
 ```
 
 Expected: build errors.
 
-- [ ] **Step 3: Implement `src/SmartUnzip/ArchiveEntry.cs`**
+- [ ] **Step 3: Implement `src/SmartExtract/ArchiveEntry.cs`**
 
 ```csharp
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public record ArchiveEntry(string Path, bool IsDirectory);
 ```
 
-- [ ] **Step 4: Implement `src/SmartUnzip/ArchiveListParser.cs`**
+- [ ] **Step 4: Implement `src/SmartExtract/ArchiveListParser.cs`**
 
 ```csharp
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class ArchiveListParser
 {
@@ -520,10 +520,10 @@ public static class ArchiveListParser
 }
 ```
 
-- [ ] **Step 5: Implement `src/SmartUnzip/SmartExtractLogic.cs`**
+- [ ] **Step 5: Implement `src/SmartExtract/SmartExtractLogic.cs`**
 
 ```csharp
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public enum ExtractionMode { Direct, Wrapped }
 
@@ -550,7 +550,7 @@ public static class SmartExtractLogic
 - [ ] **Step 6: Run — verify pass**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~ArchiveListParser|FullyQualifiedName~SmartExtractLogic"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~ArchiveListParser|FullyQualifiedName~SmartExtractLogic"
 ```
 
 Expected: 14 tests passing (6 parser + 8 logic), output pristine.
@@ -558,13 +558,13 @@ Expected: 14 tests passing (6 parser + 8 logic), output pristine.
 - [ ] **Step 7: Full suite**
 
 ```
-dotnet test SmartUnzip.sln
+dotnet test SmartExtract.sln
 ```
 
 - [ ] **Step 8: Commit**
 
 ```
-git add src/SmartUnzip/ArchiveEntry.cs src/SmartUnzip/ArchiveListParser.cs src/SmartUnzip/SmartExtractLogic.cs tests/SmartUnzip.Tests/ArchiveListParserTests.cs tests/SmartUnzip.Tests/SmartExtractLogicTests.cs
+git add src/SmartExtract/ArchiveEntry.cs src/SmartExtract/ArchiveListParser.cs src/SmartExtract/SmartExtractLogic.cs tests/SmartExtract.Tests/ArchiveListParserTests.cs tests/SmartExtract.Tests/SmartExtractLogicTests.cs
 git commit -m "feat: add ArchiveEntry, ArchiveListParser, SmartExtractLogic"
 ```
 
@@ -573,8 +573,8 @@ git commit -m "feat: add ArchiveEntry, ArchiveListParser, SmartExtractLogic"
 ### Task 4: SevenZipLocator
 
 **Files:**
-- Create: `src/SmartUnzip/SevenZipLocator.cs`
-- Create: `tests/SmartUnzip.Tests/SevenZipLocatorTests.cs`
+- Create: `src/SmartExtract/SevenZipLocator.cs`
+- Create: `tests/SmartExtract.Tests/SevenZipLocatorTests.cs`
 
 **Interfaces:**
 - `public static string SevenZipLocator.Locate()` — never null; tries registry then PATH then `C:\Program Files\7-Zip\`
@@ -583,10 +583,10 @@ git commit -m "feat: add ArchiveEntry, ArchiveListParser, SmartExtractLogic"
 
 Tests are integration tests (7-Zip installed on this machine at `C:\Program Files\7-Zip\`).
 
-- [ ] **Step 1: Write failing tests `tests/SmartUnzip.Tests/SevenZipLocatorTests.cs`**
+- [ ] **Step 1: Write failing tests `tests/SmartExtract.Tests/SevenZipLocatorTests.cs`**
 
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class SevenZipLocatorTests
 {
@@ -627,17 +627,17 @@ public class SevenZipLocatorTests
 - [ ] **Step 2: Run — verify fail**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~SevenZipLocator"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~SevenZipLocator"
 ```
 
 Expected: build errors.
 
-- [ ] **Step 3: Implement `src/SmartUnzip/SevenZipLocator.cs`**
+- [ ] **Step 3: Implement `src/SmartExtract/SevenZipLocator.cs`**
 
 ```csharp
 using Microsoft.Win32;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class SevenZipLocator
 {
@@ -681,7 +681,7 @@ public static class SevenZipLocator
 - [ ] **Step 4: Run — verify pass**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~SevenZipLocator"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~SevenZipLocator"
 ```
 
 Expected: 4 tests passing, output pristine.
@@ -689,8 +689,8 @@ Expected: 4 tests passing, output pristine.
 - [ ] **Step 5: Full suite + commit**
 
 ```
-dotnet test SmartUnzip.sln
-git add src/SmartUnzip/SevenZipLocator.cs tests/SmartUnzip.Tests/SevenZipLocatorTests.cs
+dotnet test SmartExtract.sln
+git add src/SmartExtract/SevenZipLocator.cs tests/SmartExtract.Tests/SevenZipLocatorTests.cs
 git commit -m "feat: add SevenZipLocator with registry and PATH fallback"
 ```
 
@@ -699,8 +699,8 @@ git commit -m "feat: add SevenZipLocator with registry and PATH fallback"
 ### Task 5: ExtractionRunner
 
 **Files:**
-- Create: `src/SmartUnzip/ExtractionRunner.cs`
-- Create: `tests/SmartUnzip.Tests/ExtractionRunnerTests.cs`
+- Create: `src/SmartExtract/ExtractionRunner.cs`
+- Create: `tests/SmartExtract.Tests/ExtractionRunnerTests.cs`
 
 **Interfaces:**
 - `public static string ExtractionRunner.BuildArguments(string archivePath, string outputDir)`
@@ -708,10 +708,10 @@ git commit -m "feat: add SevenZipLocator with registry and PATH fallback"
 - `public static void ExtractionRunner.Extract(string sevenZipDir, string archivePath, string outputDir)`
   - Spawns `7zG.exe` with `BuildArguments` result; waits for exit
 
-- [ ] **Step 1: Write failing tests `tests/SmartUnzip.Tests/ExtractionRunnerTests.cs`**
+- [ ] **Step 1: Write failing tests `tests/SmartExtract.Tests/ExtractionRunnerTests.cs`**
 
 ```csharp
-namespace SmartUnzip.Tests;
+namespace SmartExtract.Tests;
 
 public class ExtractionRunnerTests
 {
@@ -739,17 +739,17 @@ public class ExtractionRunnerTests
 - [ ] **Step 2: Run — verify fail**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~ExtractionRunnerTests"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~ExtractionRunnerTests"
 ```
 
 Expected: build errors.
 
-- [ ] **Step 3: Implement `src/SmartUnzip/ExtractionRunner.cs`**
+- [ ] **Step 3: Implement `src/SmartExtract/ExtractionRunner.cs`**
 
 ```csharp
 using System.Diagnostics;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class ExtractionRunner
 {
@@ -775,7 +775,7 @@ public static class ExtractionRunner
 - [ ] **Step 4: Run — verify pass**
 
 ```
-dotnet test tests/SmartUnzip.Tests/SmartUnzip.Tests.csproj --filter "FullyQualifiedName~ExtractionRunnerTests"
+dotnet test tests/SmartExtract.Tests/SmartExtract.Tests.csproj --filter "FullyQualifiedName~ExtractionRunnerTests"
 ```
 
 Expected: 3 tests passing, output pristine.
@@ -783,8 +783,8 @@ Expected: 3 tests passing, output pristine.
 - [ ] **Step 5: Full suite + commit**
 
 ```
-dotnet test SmartUnzip.sln
-git add src/SmartUnzip/ExtractionRunner.cs tests/SmartUnzip.Tests/ExtractionRunnerTests.cs
+dotnet test SmartExtract.sln
+git add src/SmartExtract/ExtractionRunner.cs tests/SmartExtract.Tests/ExtractionRunnerTests.cs
 git commit -m "feat: add ExtractionRunner wrapping 7zG.exe"
 ```
 
@@ -793,15 +793,15 @@ git commit -m "feat: add ExtractionRunner wrapping 7zG.exe"
 ### Task 6: ArchiveInspector + Program.cs Integration
 
 **Files:**
-- Create: `src/SmartUnzip/ArchiveInspector.cs`
-- Modify: `src/SmartUnzip/Program.cs` (replace stub with full implementation)
+- Create: `src/SmartExtract/ArchiveInspector.cs`
+- Modify: `src/SmartExtract/Program.cs` (replace stub with full implementation)
 
 **Interfaces:**
 - Consumes: `NameHelper.GetBaseName`, `SevenZipLocator.Locate`, `ArchiveListParser.Parse`, `SmartExtractLogic.Determine`, `ExtractionRunner.Extract`, `ExtractionMode`
 - `public static ExtractionMode ArchiveInspector.Analyze(string sevenZipDir, string archivePath, string archiveBaseName)`
   - Shells out: `7z.exe l -slt "<archivePath>"`, captures stdout (UTF-8), calls `ArchiveListParser.Parse` then `SmartExtractLogic.Determine`
 - `Program.Main` flow (in order):
-  1. `args.Length != 1` → MessageBox("Usage: SmartUnzip <archive-path>"), return 1
+  1. `args.Length != 1` → MessageBox("Usage: SmartExtract <archive-path>"), return 1
   2. `!File.Exists(args[0])` → MessageBox("File not found:\n<path>"), return 1
   3. `SevenZipLocator.Locate()` → `sevenZipDir`
   4. Missing `7z.exe` or `7zG.exe` → MessageBox("7-Zip executables not found..."), return 1
@@ -814,13 +814,13 @@ git commit -m "feat: add ExtractionRunner wrapping 7zG.exe"
 
 No new unit tests (ArchiveInspector and Program wrap live process calls). Verified by smoke tests.
 
-- [ ] **Step 1: Implement `src/SmartUnzip/ArchiveInspector.cs`**
+- [ ] **Step 1: Implement `src/SmartExtract/ArchiveInspector.cs`**
 
 ```csharp
 using System.Diagnostics;
 using System.Text;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class ArchiveInspector
 {
@@ -852,11 +852,11 @@ public static class ArchiveInspector
 }
 ```
 
-- [ ] **Step 2: Replace `src/SmartUnzip/Program.cs`**
+- [ ] **Step 2: Replace `src/SmartExtract/Program.cs`**
 
 ```csharp
 using System.Windows.Forms;
-using SmartUnzip;
+using SmartExtract;
 
 class Program
 {
@@ -865,8 +865,8 @@ class Program
     {
         if (args.Length != 1)
         {
-            MessageBox.Show("Usage: SmartUnzip <archive-path>",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Usage: SmartExtract <archive-path>",
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
 
@@ -875,7 +875,7 @@ class Program
         if (!File.Exists(archivePath))
         {
             MessageBox.Show($"File not found:\n{archivePath}",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
 
@@ -888,7 +888,7 @@ class Program
             {
                 MessageBox.Show(
                     $"7-Zip executables not found in:\n{sevenZipDir}\n\nPlease install 7-Zip.",
-                    "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 1;
             }
 
@@ -906,7 +906,7 @@ class Program
         catch (Exception ex)
         {
             MessageBox.Show($"Extraction failed:\n{ex.Message}",
-                "SmartUnzip", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "SmartExtract", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
     }
@@ -916,7 +916,7 @@ class Program
 - [ ] **Step 3: Build Release**
 
 ```
-dotnet build SmartUnzip.sln -c Release
+dotnet build SmartExtract.sln -c Release
 ```
 
 Expected: 0 errors, 0 warnings.
@@ -924,17 +924,17 @@ Expected: 0 errors, 0 warnings.
 - [ ] **Step 4: Full test suite**
 
 ```
-dotnet test SmartUnzip.sln
+dotnet test SmartExtract.sln
 ```
 
 - [ ] **Step 5: Smoke test (well-wrapped archive)**
 
 ```powershell
-$tmp = "$env:TEMP\smartunzip_smoke"
+$tmp = "$env:TEMP\SmartExtract_smoke"
 New-Item -ItemType Directory -Path "$tmp\project" -Force | Out-Null
 Set-Content "$tmp\project\readme.txt" "hello"
 & "C:\Program Files\7-Zip\7z.exe" a "$tmp\project.zip" "$tmp\project" -w"$tmp" | Out-Null
-$exe = "src\SmartUnzip\bin\Release\net10.0-windows\SmartUnzip.exe"
+$exe = "src\SmartExtract\bin\Release\net10.0-windows\SmartExtract.exe"
 & $exe "$tmp\project.zip"
 $ok = Test-Path "$tmp\project\readme.txt"
 Write-Host "Smoke test (well-wrapped): $(if ($ok) { 'PASS' } else { 'FAIL' })"
@@ -946,12 +946,12 @@ Expected: `PASS` (readme.txt is at `$tmp\project\readme.txt`, not `$tmp\project\
 - [ ] **Step 6: Smoke test (flat archive)**
 
 ```powershell
-$tmp = "$env:TEMP\smartunzip_smoke2"
+$tmp = "$env:TEMP\SmartExtract_smoke2"
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 Set-Content "$tmp\readme.txt" "hello"
 Set-Content "$tmp\main.py" "print('hi')"
 & "C:\Program Files\7-Zip\7z.exe" a "$tmp\flat.zip" "$tmp\readme.txt" "$tmp\main.py" | Out-Null
-$exe = "src\SmartUnzip\bin\Release\net10.0-windows\SmartUnzip.exe"
+$exe = "src\SmartExtract\bin\Release\net10.0-windows\SmartExtract.exe"
 & $exe "$tmp\flat.zip"
 $ok = (Test-Path "$tmp\flat\readme.txt") -and (Test-Path "$tmp\flat\main.py")
 Write-Host "Smoke test (flat): $(if ($ok) { 'PASS' } else { 'FAIL' })"
@@ -963,7 +963,7 @@ Expected: `PASS`
 - [ ] **Step 7: Commit**
 
 ```
-git add src/SmartUnzip/ArchiveInspector.cs src/SmartUnzip/Program.cs
+git add src/SmartExtract/ArchiveInspector.cs src/SmartExtract/Program.cs
 git commit -m "feat: add ArchiveInspector and wire up Program.cs entry point"
 ```
 
@@ -978,7 +978,7 @@ git commit -m "feat: add ArchiveInspector and wire up Program.cs entry point"
 **Interfaces:**
 - `install.ps1` top-level vars (single source of truth for future MSI migration):
   `$InstallDir`, `$ExeName`, `$MenuLabel`, `$MenuKey`, `$Extensions`
-- Copies `$PSScriptRoot\SmartUnzip.exe` to `$InstallDir\SmartUnzip.exe`
+- Copies `$PSScriptRoot\SmartExtract.exe` to `$InstallDir\SmartExtract.exe`
 - Writes for each extension: `HKCU:\Software\Classes\SystemFileAssociations\.<ext>\shell\SmartExtract`
   with `(Default)="Smart Extract"`, `Icon="<ExePath>,0"`, and `command\(Default)='"<ExePath>" "%1"'`
 - `uninstall.ps1`: removes same registry keys and `$InstallDir`
@@ -986,11 +986,11 @@ git commit -m "feat: add ArchiveInspector and wire up Program.cs entry point"
 - [ ] **Step 1: Write `install/install.ps1`**
 
 ```powershell
-# SmartUnzip Install Script
+# SmartExtract Install Script
 # Per-user — no administrator privileges required.
 
-$InstallDir = "C:\Program Files\SmartUnzip"
-$ExeName    = "SmartUnzip.exe"
+$InstallDir = "C:\Program Files\SmartExtract"
+$ExeName    = "SmartExtract.exe"
 $MenuLabel  = "Smart Extract"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
@@ -999,7 +999,7 @@ $ExePath   = Join-Path $InstallDir $ExeName
 $SourceExe = Join-Path $PSScriptRoot $ExeName
 
 if (-not (Test-Path $SourceExe)) {
-    Write-Error "Cannot find '$ExeName' at: $PSScriptRoot`nBuild first: dotnet publish src/SmartUnzip -c Release -o install/"
+    Write-Error "Cannot find '$ExeName' at: $PSScriptRoot`nBuild first: dotnet publish src/SmartExtract -c Release -o install/"
     exit 1
 }
 
@@ -1032,9 +1032,9 @@ Write-Host "Installation complete. Right-click any archive and choose '$MenuLabe
 - [ ] **Step 2: Write `install/uninstall.ps1`**
 
 ```powershell
-# SmartUnzip Uninstall Script
+# SmartExtract Uninstall Script
 
-$InstallDir = "C:\Program Files\SmartUnzip"
+$InstallDir = "C:\Program Files\SmartExtract"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
 
@@ -1062,7 +1062,7 @@ Write-Host "Uninstall complete."
 - [ ] **Step 3: Build and publish**
 
 ```
-dotnet publish src/SmartUnzip/SmartUnzip.csproj -c Release -o install/ --self-contained false
+dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/ --self-contained false
 ```
 
 - [ ] **Step 4: Run install and verify registry**

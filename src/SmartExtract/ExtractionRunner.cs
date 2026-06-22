@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace SmartUnzip;
+namespace SmartExtract;
 
 public static class ExtractionRunner
 {

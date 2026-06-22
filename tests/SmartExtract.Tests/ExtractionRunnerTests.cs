@@ -1,4 +1,4 @@
-﻿namespace SmartUnzip.Tests;
+﻿namespace SmartExtract.Tests;
 
 public class ExtractionRunnerTests
 {

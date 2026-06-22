@@ -1,4 +1,4 @@
-﻿namespace SmartUnzip;
+﻿namespace SmartExtract;
 
 public static class NameHelper
 {
