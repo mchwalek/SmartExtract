@@ -1,6 +1,6 @@
 ﻿# SmartExtract Uninstall Script
 
-$InstallDir = Join-Path $env:LOCALAPPDATA "SmartExtract"
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\SmartExtract"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
 
