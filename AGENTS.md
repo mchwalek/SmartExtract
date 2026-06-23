@@ -48,9 +48,22 @@ tests/SmartExtract.Tests/
   SevenZipLocatorTests.cs    # integration — requires 7-Zip installed
   ExtractionRunnerTests.cs
 
-install/
-  install.ps1              Per-user install — copies 4 publish artifacts, writes 6 registry entries
+scripts/
+  install.ps1              Per-user install (-PublishDir, -SevenZipDir params)
   uninstall.ps1            Removes registry entries and install dir
+
+installer/
+  SmartExtract.iss         Inno Setup script
+
+build/
+  publish/                 dotnet publish output (gitignored)
+
+dist/
+  SmartExtractSetup.exe    Produced by Inno Setup (gitignored)
+
+.github/
+  workflows/
+    release.yml            Tag push -> draft GitHub Release
 
 .agents/skills/
   developing-smartextract/ # Project skill: development guide
@@ -63,9 +76,11 @@ install/
 dotnet build SmartExtract.slnx                              # build
 dotnet build SmartExtract.slnx -c Release                  # release build
 dotnet test SmartExtract.slnx -c Release                   # all 36 tests (must be Release)
-dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/  # produce deployable artifacts
-PowerShell -ExecutionPolicy Bypass -File install/install.ps1    # install context menu
-PowerShell -ExecutionPolicy Bypass -File install/uninstall.ps1  # uninstall
+dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o build/publish/  # publish artifacts
+PowerShell -ExecutionPolicy Bypass -File scripts/install.ps1    # install context menu
+PowerShell -ExecutionPolicy Bypass -File scripts/uninstall.ps1  # uninstall
+# Build installer (requires Inno Setup 6):
+& "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer\SmartExtract.iss /DAppVersion=0.0.0
 ```
 
 ## Code Conventions
@@ -81,4 +96,4 @@ PowerShell -ExecutionPolicy Bypass -File install/uninstall.ps1  # uninstall
 - **Tests require `-c Release`** — Windows Smart App Control blocks Debug DLLs. Always run `dotnet test ... -c Release`.
 - **SevenZipLocatorTests are integration tests** — they read the real Windows registry and verify 7-Zip files exist. 7-Zip must be installed on the test machine.
 - **No unit tests for `ArchiveInspector` or `Program`** — both wrap live process calls. Verified by smoke tests (see testing-smartextract skill).
-- **Install produces 4 required files** — `.exe`, `.dll`, `.deps.json`, `.runtimeconfig.json`. The install script copies all non-`.ps1`/non-`.pdb` files from the `install/` directory.
+- **Install produces 4 required files** — `.exe`, `.dll`, `.deps.json`, `.runtimeconfig.json`. The install script copies all non-`.ps1`/non-`.pdb` files from the publish directory.

@@ -58,3 +58,34 @@ With UseShellExecute=false, WaitForExit() returns before extraction completes
 (likely because 7zG.exe cannot properly initialize its message pump without the
 shell). Setting UseShellExecute=true fixes the timing issue. Discovered and fixed
 during smoke testing (commit 3ffd07a).
+
+## D14: 7-Zip path stored in HKCU\Software\SmartExtract\SevenZipPath
+Per-user, works for both machine-wide and per-user installs. Independent of 7-Zip's
+own registry key. SevenZipLocator checks this before any other source.
+
+## D15: Check and warn for .NET 10 runtime (don't block, don't bundle)
+Keeps the installer small (<5 MB). Most users on a fresh machine will install .NET
+before or alongside SmartExtract. Blocking install on a missing runtime frustrates
+users on air-gapped machines.
+
+## D16: Draft releases only (not published immediately)
+Gives the maintainer a review window to add/edit release notes and verify the asset
+before it goes public.
+
+## D17: Keep PowerShell scripts in scripts/ for power users
+Useful for scripted/CI installs and for users who prefer not to run a GUI wizard.
+
+## D18: Add MIT LICENSE file
+Required by the Inno Setup license page. Also good practice for an open-source tool.
+
+## D19: softprops/action-gh-release@v2 for GitHub release creation
+Well-maintained action that handles draft creation and asset attachment in a single
+step using only the built-in GITHUB_TOKEN.
+
+## D20: iscc via Chocolatey on windows-latest
+Chocolatey is pre-installed on GitHub-hosted Windows runners. choco install innosetup
+is the standard approach for Inno Setup in CI.
+
+## D21: install/ renamed to scripts/
+Cleaner separation: scripts/ holds PowerShell helpers, build/publish/ holds dotnet
+output, installer/ holds the Inno Setup script, dist/ holds the generated installer.

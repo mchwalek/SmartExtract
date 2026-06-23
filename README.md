@@ -50,19 +50,35 @@ All formats supported by 7-Zip work transparently — SmartExtract delegates the
 
 ## Installation
 
+### Option A: Windows Installer (recommended)
+
+Download `SmartExtractSetup.exe` from the [latest release](https://github.com/mchwalek/SmartExtract/releases/latest) and run it.
+
+The installer wizard will:
+1. Let you choose between a machine-wide install (requires administrator) or a per-user install (no admin required)
+2. Auto-detect your 7-Zip installation and let you confirm or correct the path
+3. Warn if the .NET 10 Desktop Runtime is not present (with a download link)
+4. Register the **Smart Extract** context menu entry for all supported extensions
+
+To uninstall, use **Settings → Apps** or **Control Panel → Programs and Features**.
+
+### Option B: PowerShell scripts (power users / CI)
+
 **1. Build**
 
 ```powershell
-dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/
+dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o build/publish/
 ```
 
 **2. Install** (no administrator rights required — per-user install)
 
 ```powershell
-PowerShell -ExecutionPolicy Bypass -File install/install.ps1
+PowerShell -ExecutionPolicy Bypass -File scripts/install.ps1
+# Optional: specify 7-Zip location explicitly
+PowerShell -ExecutionPolicy Bypass -File scripts/install.ps1 -SevenZipDir "C:\Program Files\7-Zip\"
 ```
 
-This copies the application to `%LOCALAPPDATA%\SmartExtract\` and registers the **Smart Extract** context menu entry for all supported extensions under your user account (`HKCU`).
+This copies the application to `%LOCALAPPDATA%\Programs\SmartExtract\` and registers the **Smart Extract** context menu entry for all supported extensions under your user account (`HKCU`).
 
 **3. Use**
 
@@ -70,8 +86,12 @@ Right-click any supported archive file in Windows Explorer → **Smart Extract**
 
 ## Uninstall
 
+**If installed via installer:** use **Settings → Apps → SmartExtract → Uninstall**.
+
+**If installed via PowerShell:**
+
 ```powershell
-PowerShell -ExecutionPolicy Bypass -File install/uninstall.ps1
+PowerShell -ExecutionPolicy Bypass -File scripts/uninstall.ps1
 ```
 
 Removes the context menu entries and the install directory. No leftovers.
@@ -85,7 +105,7 @@ SmartExtract is a headless C# WinForms application (`WinExe`) — it shows no wi
 3. **Extract** — delegates to `7zG.exe` (7-Zip's GUI executable), which shows the native 7-Zip progress dialog and handles any password prompts
 4. **Done** — errors are surfaced as a `MessageBox`; silent on success
 
-7-Zip's path is discovered from the registry (`HKCU\Software\7-Zip`) with a fallback to `C:\Program Files\7-Zip\`.
+7-Zip's path is discovered from SmartExtract's stored configuration (`HKCU\Software\SmartExtract\SevenZipPath`), then 7-Zip's registry key, `PATH`, and finally `C:\Program Files\7-Zip\`.
 
 ## Project structure
 
@@ -107,9 +127,12 @@ tests/SmartExtract.Tests/
   SevenZipLocatorTests.cs
   ExtractionRunnerTests.cs
 
-install/
+scripts/
   install.ps1             Per-user install + context menu registration
   uninstall.ps1           Cleanup
+
+installer/
+  SmartExtract.iss        Inno Setup script (produces dist/SmartExtractSetup.exe)
 ```
 
 ## Building and testing
