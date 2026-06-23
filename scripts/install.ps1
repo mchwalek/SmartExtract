@@ -19,7 +19,10 @@ $MenuLabel  = "Smart Extract"
 $MenuKey    = "SmartExtract"
 $Extensions = @(".zip", ".7z", ".rar", ".gz", ".bz2", ".tar")
 
-$PublishDir = (Resolve-Path $PublishDir -ErrorAction SilentlyContinue)?.Path ?? $PublishDir
+$resolvedPublishDir = Resolve-Path -LiteralPath $PublishDir -ErrorAction SilentlyContinue
+if ($null -ne $resolvedPublishDir) {
+    $PublishDir = $resolvedPublishDir.Path
+}
 $SourceExe  = Join-Path $PublishDir $ExeName
 $ExePath    = Join-Path $InstallDir $ExeName
 

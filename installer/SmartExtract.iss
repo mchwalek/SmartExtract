@@ -124,7 +124,7 @@ begin
 end;
 
 { Check for .NET 10 Desktop Runtime via registry.
-  Key: HKLM\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App
+  Key: HKLM64\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App
   Subkeys are version strings like "10.0.0". }
 function IsDotNet10Installed(): Boolean;
 var
@@ -133,7 +133,7 @@ var
 begin
   Result := False;
   if RegGetSubkeyNames(
-    HKLM,
+    HKLM64,
     'SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App',
     Keys) then
   begin

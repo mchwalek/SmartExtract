@@ -75,7 +75,7 @@ dist/
 ```powershell
 dotnet build SmartExtract.slnx                              # build
 dotnet build SmartExtract.slnx -c Release                  # release build
-dotnet test SmartExtract.slnx -c Release                   # all 36 tests (must be Release)
+dotnet test SmartExtract.slnx -c Release                   # all 39 tests (must be Release)
 dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o build/publish/  # publish artifacts
 PowerShell -ExecutionPolicy Bypass -File scripts/install.ps1    # install context menu
 PowerShell -ExecutionPolicy Bypass -File scripts/uninstall.ps1  # uninstall

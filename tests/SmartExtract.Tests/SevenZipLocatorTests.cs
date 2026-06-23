@@ -2,6 +2,9 @@
 
 public class SevenZipLocatorTests
 {
+    private const string SmartExtractRegistryKey = @"Software\SmartExtract";
+    private const string SevenZipPathValue = "SevenZipPath";
+
     [Xunit.Fact]
     public void LocateFromRegistry_ReturnsProgramFilesPath()
     {
@@ -38,55 +41,85 @@ public class SevenZipLocatorTests
     public void LocateFromSmartExtractConfig_ReturnsStoredPath_WhenRegistryKeyExists()
     {
         const string testPath = @"C:\Fake\SevenZip\";
-        const string regKey = @"Software\SmartExtract";
-
-        // Arrange: write the test value
-        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regKey);
-        key.SetValue("SevenZipPath", testPath);
+        var state = CaptureSmartExtractConfigState();
 
         try
         {
-            // Act
+            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(SmartExtractRegistryKey);
+            key.SetValue(SevenZipPathValue, testPath);
+
             var result = SevenZipLocator.LocateFromSmartExtractConfig();
 
-            // Assert
             Xunit.Assert.Equal(testPath, result);
         }
         finally
         {
-            // Cleanup: remove the test registry key
-            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(regKey, throwOnMissingSubKey: false);
+            RestoreSmartExtractConfigState(state);
         }
     }
 
     [Xunit.Fact]
     public void LocateFromSmartExtractConfig_ReturnsNull_WhenRegistryKeyAbsent()
     {
-        // Ensure the key does not exist
-        Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(@"Software\SmartExtract", throwOnMissingSubKey: false);
+        var state = CaptureSmartExtractConfigState();
 
-        var result = SevenZipLocator.LocateFromSmartExtractConfig();
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(SmartExtractRegistryKey, writable: true);
+            key?.DeleteValue(SevenZipPathValue, throwOnMissingValue: false);
 
-        Xunit.Assert.Null(result);
+            var result = SevenZipLocator.LocateFromSmartExtractConfig();
+
+            Xunit.Assert.Null(result);
+        }
+        finally
+        {
+            RestoreSmartExtractConfigState(state);
+        }
     }
 
     [Xunit.Fact]
     public void Locate_PrefersSmartExtractConfigOverSevenZipRegistry()
     {
         const string testPath = @"C:\Fake\SevenZip\";
-        const string regKey = @"Software\SmartExtract";
-
-        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regKey);
-        key.SetValue("SevenZipPath", testPath);
+        var state = CaptureSmartExtractConfigState();
 
         try
         {
+            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(SmartExtractRegistryKey);
+            key.SetValue(SevenZipPathValue, testPath);
+
             var result = SevenZipLocator.Locate();
             Xunit.Assert.Equal(testPath, result);
         }
         finally
         {
-            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(regKey, throwOnMissingSubKey: false);
+            RestoreSmartExtractConfigState(state);
+        }
+    }
+
+    private static (bool KeyExists, string? SevenZipPath) CaptureSmartExtractConfigState()
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(SmartExtractRegistryKey);
+        return (key is not null, key?.GetValue(SevenZipPathValue) as string);
+    }
+
+    private static void RestoreSmartExtractConfigState((bool KeyExists, string? SevenZipPath) state)
+    {
+        if (!state.KeyExists)
+        {
+            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(SmartExtractRegistryKey, throwOnMissingSubKey: false);
+            return;
+        }
+
+        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(SmartExtractRegistryKey);
+        if (state.SevenZipPath is null)
+        {
+            key.DeleteValue(SevenZipPathValue, throwOnMissingValue: false);
+        }
+        else
+        {
+            key.SetValue(SevenZipPathValue, state.SevenZipPath);
         }
     }
 }
