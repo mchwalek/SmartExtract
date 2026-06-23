@@ -5,3 +5,4 @@ obj/
 build/
 dist/
 installer/Output/
+.idea/
