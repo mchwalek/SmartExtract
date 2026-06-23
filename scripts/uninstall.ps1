@@ -14,6 +14,14 @@ foreach ($ext in $Extensions) {
     }
 }
 
+$configKey = "HKCU:\Software\SmartExtract"
+if (Test-Path $configKey) {
+    Remove-Item -Path $configKey -Recurse -Force
+    Write-Host "Removed: $configKey"
+} else {
+    Write-Host "Not found (skipping): $configKey"
+}
+
 if (Test-Path $InstallDir) {
     Remove-Item -Path $InstallDir -Recurse -Force
     Write-Host "Removed: $InstallDir"
