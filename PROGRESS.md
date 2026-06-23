@@ -32,7 +32,7 @@ resume, check this file and `git log` to determine where to resume.
 | 4 | Add MIT LICENSE | complete | 0d04d8e |
 | 5 | Inno Setup script (installer/SmartExtract.iss) | complete | 90e9b54 |
 | 6 | GitHub Actions release workflow | complete | 6f3637b |
-| 7 | Documentation updates | complete | e435557 |
+| 7 | Documentation updates + uninstall path fix | complete | e435557, a819885 |
 
 ## Bug fixes during initial implementation
 - 8276191: ArchiveListParser: split on blank lines within ---------- blocks (D12)
