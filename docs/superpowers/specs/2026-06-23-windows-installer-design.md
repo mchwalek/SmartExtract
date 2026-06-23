@@ -33,7 +33,7 @@ install/
 
 ```
 scripts/
-  install.ps1          ← updated to copy from build/publish/ (default) or a custom -PublishDir
+  install.ps1          ← updated: -PublishDir (default build/publish/), optional -SevenZipDir (written to registry)
   uninstall.ps1        ← unchanged logic; updated path references only
 build/
   publish/             ← dotnet publish output (gitignored)
@@ -161,7 +161,7 @@ The release name is the tag name (e.g., `v1.0.0`). Release notes are left blank 
 | File | Change |
 |------|--------|
 | `install/` → `scripts/` | Directory renamed |
-| `scripts/install.ps1` | Updated to accept `-PublishDir` param, copy from `build/publish/` by default |
+| `scripts/install.ps1` | Updated to accept `-PublishDir` param (default `build/publish/`) and `-SevenZipDir` param (optional; if provided, written to `HKCU\Software\SmartExtract\SevenZipPath`) |
 | `scripts/uninstall.ps1` | Path reference updates only |
 | `src/SmartExtract/SevenZipLocator.cs` | Add `LocateFromSmartExtractConfig()`; update `Locate()` |
 | `tests/SmartExtract.Tests/SevenZipLocatorTests.cs` | Add test for `LocateFromSmartExtractConfig()` |
