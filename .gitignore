@@ -2,3 +2,6 @@
 obj/
 *.user
 .vs/
+build/
+dist/
+installer/Output/
