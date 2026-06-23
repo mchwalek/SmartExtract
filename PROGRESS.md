@@ -33,3 +33,19 @@ resume, check this file and `git log` to determine where to resume.
 
 ## Next step
 Final code review (all tasks complete)
+
+---
+
+## Windows installer + CI tasks
+
+Plan: `docs/superpowers/plans/2026-06-23-windows-installer.md`
+
+| Task | Description | Status | Commits |
+|------|-------------|--------|---------|
+| 1 | Repo restructure (install/ → scripts/, .gitignore) | complete | 51d5388..a3bce24 |
+| 2 | Update scripts/install.ps1 (-PublishDir, -SevenZipDir) | pending | — |
+| 3 | SevenZipLocator — SmartExtract config lookup | pending | — |
+| 4 | Add MIT LICENSE file | pending | — |
+| 5 | Inno Setup script | pending | — |
+| 6 | GitHub Actions release workflow | pending | — |
+| 7 | Documentation updates | pending | — |
