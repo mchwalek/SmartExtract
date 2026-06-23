@@ -19,12 +19,12 @@ metadata:
 ## Running Tests
 
 ```powershell
-dotnet test SmartExtract.slnx -c Release              # all 36 tests
+dotnet test SmartExtract.slnx -c Release              # all 39 tests
 dotnet test SmartExtract.slnx -c Release --filter "FullyQualifiedName~NameHelper"         # NameHelper tests only
 dotnet test SmartExtract.slnx -c Release --filter "FullyQualifiedName~SmartExtractLogic"  # extraction logic tests only
 ```
 
-Expected output: `36/36 passing, output pristine`.
+Expected output: `39/39 passing, output pristine`.
 
 ## Test Files and Coverage
 
@@ -90,7 +90,7 @@ These test against the real Windows registry and filesystem. 7-Zip must be insta
 
 ## Smoke Tests
 
-Run after `dotnet publish ... -o install/` and `dotnet build SmartExtract.slnx -c Release`:
+Run after `dotnet publish ... -o build/publish/` and `dotnet build SmartExtract.slnx -c Release`:
 
 ```powershell
 $exe = (Resolve-Path "src\SmartExtract\bin\Release\net10.0-windows\SmartExtract.exe").Path

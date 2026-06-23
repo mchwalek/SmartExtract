@@ -78,11 +78,43 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.tar\shell\SmartExt
 var
   SevenZipPage: TInputDirWizardPage;
 
+function FindSevenZipFromPath(): String;
+var
+  PathEnv: String;
+  Dir: String;
+  Sep: Integer;
+begin
+  Result := '';
+  PathEnv := GetEnv('PATH');
+
+  while PathEnv <> '' do
+  begin
+    Sep := Pos(';', PathEnv);
+    if Sep > 0 then
+    begin
+      Dir := Copy(PathEnv, 1, Sep - 1);
+      Delete(PathEnv, 1, Sep);
+    end
+    else
+    begin
+      Dir := PathEnv;
+      PathEnv := '';
+    end;
+
+    Dir := Trim(Dir);
+    if (Dir <> '') and FileExists(AddBackslash(Dir) + '7z.exe') then
+    begin
+      Result := AddBackslash(Dir);
+      Exit;
+    end;
+  end;
+end;
+
 { Detect 7-Zip path using same priority as SevenZipLocator.cs:
   1. HKCU\Software\7-Zip -> Path64
   2. HKCU\Software\7-Zip -> Path
-  3. Hardcoded fallback
-  (PATH env search is not feasible in Pascal; handled at runtime by the app) }
+  3. PATH env search for 7z.exe
+  4. Hardcoded fallback }
 function GetSevenZipDefaultPath(): String;
 var
   Path: String;
@@ -93,6 +125,12 @@ begin
     Exit;
   end;
   if RegQueryStringValue(HKCU, 'Software\7-Zip', 'Path', Path) and (Path <> '') then
+  begin
+    Result := Path;
+    Exit;
+  end;
+  Path := FindSevenZipFromPath();
+  if Path <> '' then
   begin
     Result := Path;
     Exit;

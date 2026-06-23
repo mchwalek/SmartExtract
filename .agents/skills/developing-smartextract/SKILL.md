@@ -19,8 +19,8 @@ SmartExtract is a **Windows-only** WinExe (no console window) that adds a "Smart
 dotnet build SmartExtract.slnx               # debug build
 dotnet build SmartExtract.slnx -c Release    # release build
 
-# Produce deployable artifacts into install/
-dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o install/
+# Produce deployable artifacts into build/publish/
+dotnet publish src/SmartExtract/SmartExtract.csproj -c Release -o build/publish/
 ```
 
 Publish output: `SmartExtract.exe`, `SmartExtract.dll`, `SmartExtract.deps.json`, `SmartExtract.runtimeconfig.json` — all four files are required at runtime.
@@ -40,9 +40,18 @@ src/SmartExtract/
 
 tests/SmartExtract.Tests/   # One file per source class (see testing-smartextract skill)
 
-install/
+scripts/
   install.ps1             Per-user install — no admin. Copies all publish artifacts, writes registry
   uninstall.ps1           Removes registry keys and install dir
+
+installer/
+  SmartExtract.iss        Inno Setup script
+
+build/
+  publish/                dotnet publish output (gitignored)
+
+dist/
+  SmartExtractSetup.exe   Produced by Inno Setup (gitignored)
 ```
 
 ## Core Logic
@@ -62,7 +71,7 @@ Top-level = `ArchiveEntry.Path` contains no `/` or `\`.
 
 Must use `UseShellExecute = true`. Using `false` prevents 7zG.exe from initializing its message loop, causing `WaitForExit()` to return before extraction completes.
 
-### Context menu registration (`install.ps1`)
+### Context menu registration (`scripts/install.ps1`)
 
 Registered under `HKCU\Software\Classes\SystemFileAssociations\.<ext>\shell\SmartExtract` — per-user, no admin required. Supported extensions: `.zip`, `.7z`, `.rar`, `.gz`, `.bz2`, `.tar`.
 
@@ -76,7 +85,7 @@ Registered under `HKCU\Software\Classes\SystemFileAssociations\.<ext>\shell\Smar
 
 ## Adding a New Archive Format
 
-1. Add the extension to `$Extensions` in `install/install.ps1` and `install/uninstall.ps1`
+1. Add the extension to `$Extensions` in `scripts/install.ps1` and `scripts/uninstall.ps1`
 2. No code changes needed — 7-Zip handles the actual format support
 
 ## Changing the Extraction Logic
