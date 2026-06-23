@@ -33,4 +33,60 @@ public class SevenZipLocatorTests
         Xunit.Assert.NotNull(result);
         Xunit.Assert.NotEmpty(result);
     }
+
+    [Xunit.Fact]
+    public void LocateFromSmartExtractConfig_ReturnsStoredPath_WhenRegistryKeyExists()
+    {
+        const string testPath = @"C:\Fake\SevenZip\";
+        const string regKey = @"Software\SmartExtract";
+
+        // Arrange: write the test value
+        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regKey);
+        key.SetValue("SevenZipPath", testPath);
+
+        try
+        {
+            // Act
+            var result = SevenZipLocator.LocateFromSmartExtractConfig();
+
+            // Assert
+            Xunit.Assert.Equal(testPath, result);
+        }
+        finally
+        {
+            // Cleanup: remove the test registry key
+            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(regKey, throwOnMissingSubKey: false);
+        }
+    }
+
+    [Xunit.Fact]
+    public void LocateFromSmartExtractConfig_ReturnsNull_WhenRegistryKeyAbsent()
+    {
+        // Ensure the key does not exist
+        Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(@"Software\SmartExtract", throwOnMissingSubKey: false);
+
+        var result = SevenZipLocator.LocateFromSmartExtractConfig();
+
+        Xunit.Assert.Null(result);
+    }
+
+    [Xunit.Fact]
+    public void Locate_PrefersSmartExtractConfigOverSevenZipRegistry()
+    {
+        const string testPath = @"C:\Fake\SevenZip\";
+        const string regKey = @"Software\SmartExtract";
+
+        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regKey);
+        key.SetValue("SevenZipPath", testPath);
+
+        try
+        {
+            var result = SevenZipLocator.Locate();
+            Xunit.Assert.Equal(testPath, result);
+        }
+        finally
+        {
+            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(regKey, throwOnMissingSubKey: false);
+        }
+    }
 }

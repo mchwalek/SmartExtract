@@ -7,7 +7,19 @@ public static class SevenZipLocator
     private const string FallbackPath = @"C:\Program Files\7-Zip\";
 
     public static string Locate() =>
-        LocateFromRegistry() ?? LocateFromPath() ?? FallbackPath;
+        LocateFromSmartExtractConfig() ?? LocateFromRegistry() ?? LocateFromPath() ?? FallbackPath;
+
+    public static string? LocateFromSmartExtractConfig()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\SmartExtract");
+            if (key is null) return null;
+            var path = key.GetValue("SevenZipPath") as string;
+            return string.IsNullOrWhiteSpace(path) ? null : path;
+        }
+        catch { return null; }
+    }
 
     public static string? LocateFromRegistry()
     {
