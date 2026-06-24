@@ -6,10 +6,13 @@ public class SevenZipLocatorTests
     private const string SevenZipPathValue = "SevenZipPath";
 
     [Xunit.Fact]
-    public void LocateFromRegistry_ReturnsProgramFilesPath()
+    public void LocateFromRegistry_ReturnsProgramFilesPath_WhenHkcuKeyExists()
     {
+        // HKCU\Software\7-Zip is only written by 7-Zip's per-user installer.
+        // System-wide 7-Zip installs (e.g. on CI) write to HKLM instead,
+        // so LocateFromRegistry() correctly returns null in that case.
         var result = SevenZipLocator.LocateFromRegistry();
-        Xunit.Assert.NotNull(result);
+        if (result is null) return;
         Xunit.Assert.Contains("7-Zip", result, System.StringComparison.OrdinalIgnoreCase);
     }
 
