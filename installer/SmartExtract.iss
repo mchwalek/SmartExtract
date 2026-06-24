@@ -161,41 +161,4 @@ begin
     RegWriteStringValue(HKCU, 'Software\SmartExtract', 'SevenZipPath', SevenZipPage.Values[0]);
 end;
 
-{ Check for .NET 10 Desktop Runtime via registry.
-  Key: HKLM64\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App
-  Subkeys are version strings like "10.0.0". }
-function IsDotNet10Installed(): Boolean;
-var
-  Keys: TArrayOfString;
-  I: Integer;
-begin
-  Result := False;
-  if RegGetSubkeyNames(
-    HKLM64,
-    'SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App',
-    Keys) then
-  begin
-    for I := 0 to GetArrayLength(Keys) - 1 do
-      if Copy(Keys[I], 1, 3) = '10.' then
-      begin
-        Result := True;
-        Break;
-      end;
-  end;
-end;
 
-{ Show a non-blocking warning if .NET 10 is absent. Installation continues. }
-function InitializeSetup(): Boolean;
-begin
-  if not IsDotNet10Installed() then
-    MsgBox(
-      '.NET 10 Desktop Runtime was not detected on this machine.' + #13#10 +
-      'SmartExtract requires it to run.' + #13#10 + #13#10 +
-      'Download it from:' + #13#10 +
-      'https://dotnet.microsoft.com/download/dotnet/10.0' + #13#10 + #13#10 +
-      'Installation will continue regardless.',
-      mbInformation,
-      MB_OK
-    );
-  Result := True;
-end;
