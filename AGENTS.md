@@ -97,3 +97,7 @@ PowerShell -ExecutionPolicy Bypass -File scripts/uninstall.ps1  # uninstall
 - **SevenZipLocatorTests are integration tests** — they read the real Windows registry and verify 7-Zip files exist. 7-Zip must be installed on the test machine.
 - **No unit tests for `ArchiveInspector` or `Program`** — both wrap live process calls. Verified by smoke tests (see testing-smartextract skill).
 - **Install produces 4 required files** — `.exe`, `.dll`, `.deps.json`, `.runtimeconfig.json`. The install script copies all non-`.ps1`/non-`.pdb` files from the publish directory.
+
+## Architecture
+
+Design decisions and implementation notes are in [ARCHITECTURE.md](ARCHITECTURE.md).

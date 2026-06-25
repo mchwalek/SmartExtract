@@ -57,8 +57,7 @@ Download `SmartExtractSetup.exe` from the [latest release](https://github.com/mc
 The installer wizard will:
 1. Let you choose between a machine-wide install (requires administrator) or a per-user install (no admin required)
 2. Auto-detect your 7-Zip installation and let you confirm or correct the path
-3. Warn if the .NET 10 Desktop Runtime is not present (with a download link)
-4. Register the **Smart Extract** context menu entry for all supported extensions
+3. Register the **Smart Extract** context menu entry for all supported extensions
 
 To uninstall, use **Settings → Apps** or **Control Panel → Programs and Features**.
 
@@ -151,3 +150,7 @@ dotnet test SmartExtract.slnx -c Release
 - Windows Registry (`Microsoft.Win32`) — for 7-Zip discovery and context menu registration
 - xUnit 2.9 — unit tests
 - 7-Zip (`7z.exe`, `7zG.exe`) — archive listing and extraction
+
+## Architecture
+
+Design decisions and implementation notes are in [ARCHITECTURE.md](ARCHITECTURE.md).
