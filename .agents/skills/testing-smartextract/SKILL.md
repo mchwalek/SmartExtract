@@ -7,6 +7,10 @@ metadata:
 
 # Testing SmartExtract
 
+## Do Not Commit
+
+Do not create or commit `PROGRESS.md`, `DECISIONS.md`, or anything under `docs/superpowers/`. These are AI agent scaffolding files that were removed from this project. Architecture and design decisions live in **`ARCHITECTURE.md`**.
+
 ## Test Suite Overview
 
 | Suite       | Command                                      | Files                                    | What it tests                                        |

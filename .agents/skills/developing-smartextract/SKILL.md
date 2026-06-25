@@ -13,6 +13,18 @@ SmartExtract is a **Windows-only** WinExe (no console window) that adds a "Smart
 
 **Windows is a hard requirement** — the project uses `net10.0-windows`, `System.Windows.Forms` (MessageBox), `Microsoft.Win32` (registry), and the Windows shell context menu. It will not build or run on Linux/macOS.
 
+## Do Not Commit
+
+The following files and directories must **never** be committed to this repo. Delete or ignore them if they appear:
+
+| Path | Reason |
+|------|--------|
+| `PROGRESS.md` | AI agent bookkeeping — not project documentation |
+| `DECISIONS.md` | Replaced by `ARCHITECTURE.md` |
+| `docs/superpowers/` | AI brainstorm specs and implementation plans — scaffolding artifacts |
+
+Architecture and design decisions live in **`ARCHITECTURE.md`** at the repo root.
+
 ## Build and Publish
 
 ```powershell
